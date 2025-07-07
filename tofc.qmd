@@ -1,0 +1,47 @@
+---
+title: "commons_analysis"
+author: "Chloe Denhart"
+format: html
+editor: visual
+---
+
+## 
+
+This document provides an analysis of data conducted from students and online workers. The participants were tasked with maintaining a general "natural" resource (tokens) across 20 repeated rounds.
+
+Here we are loading in the data set and filtering across only the maintenance treatment. Meaning the participant were tasked with not letting the natural resource deplete, a typical tragedy of commons simulation.
+
+```{r}
+# load tidyverse
+library(tidyverse)
+library(haven)
+
+# tells R to skip the first two rows of dataset and start on the third one
+tofc <- read_dta("GKQ_Dataset.dta")
+head(tofc)
+# filtering for only the maintenance treatment
+tofc_maint <- tofc |>
+  filter(cpp == 0)
+head(tofc_maint)
+```
+
+In this next section we will identify what percent of the participants cooperated across rounds versus defected. It will allow for us to understand if the subjects were considerate of other people and the resource as a whole or if they were selfish.
+
+```{r}
+# Compute mean withdrawal per participant
+tofc_maint_summary <- tofc_maint %>%
+  group_by(id, strangers) %>%
+  summarise(mean_withdrawal = mean(c), .groups = "drop")
+
+head(tofc_maint_summary)
+
+```
+
+Some players were extremely selfish whereas others not so much. Let see how many players took all 20?
+
+```{r}
+tofc_maint_summary |>
+  count(mean_withdrawal == 20)
+```
+
+20 out of 432 participants chose all 20 tokens.

@@ -1,0 +1,134 @@
+---
+title: "Economic Simulation Data Analysis"
+author: "Chloe Denhart"
+date: Sys.date()
+format: html
+editor: visual
+---
+
+## Data Analysis
+
+This dataset is from a study conducted by 120 undergraduate students.
+
+```{r}
+# load in data
+library(tidyverse)
+
+pd <- read_csv("pd_data.csv")
+head(pd)
+colnames(pd)
+```
+
+\
+This code will help us understand how many people cooperated versus defected in each experimental condition. "Does the experimental condition ('imagine' vs 'control') affect the likelihood of cooperating?" The participants played a total of
+
+```{r}
+# calculated the proportion of cooperation
+pd <- pd |>
+  mutate(coop_rate = coop / 20)
+pd
+```
+
+Here we will summarize the average cooperation by condition
+
+```{r}
+# Calculate mean, standard deviation, and count for each group
+pd %>%
+  group_by(con) %>%
+  summarise(
+    mean_rate = mean(coop_rate, na.rm = TRUE),
+    sd_rate = sd(coop_rate, na.rm = TRUE),
+    n = n()
+  )
+
+```
+
+Visualizing cooperation rate by condition
+
+```{r}
+pd %>%
+  ggplot(aes(x = con, y = coop_rate, fill = con)) +
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3, fill = "yellow") +
+  labs(
+    title = "Cooperation Rates by Condition",
+    x = "Condition",
+    y = "Proportion of Rounds Cooperated"
+  ) +
+  theme_minimal()
+
+```
+
+Here we can clearly see that participants were more likely to cooperate when they were told a story about helping a partner or teammate rather than looking at random words and then going through the simulation
+
+```{r}
+# Compare mean cooperation rates statistically
+t.test(coop_rate ~ con, data = pd)
+
+```
+
+This allows us to Check if the difference in average cooperation the imagine and control are statistically significant. Since we are looking at a 95% confidence interval and the p-value is 0.008394 (less than 0.05) our test is statistically significant. This is evidence that both of our groups differ (imagine and control).
+
+This next test is a logistic regression of the first round, testing for demographics and empathy scores. Test whether participants in the “imagine” group were more likely to cooperate on the very first round, controlling for demographics and empathy scores.
+
+```{r}
+# Logistic regression: does imagining affect first round choice?
+model <- glm(first.choice ~ con + sex + age + teq + iri_pt + iri_ec,
+             data = pd, family = binomial)
+
+summary(model)
+
+```
+
+The only statistically significant variable here for whether the participants decide to cooperate or defect on the first round is "conword" (or the condition word). Participants are less likely to cooperate on the first round when given words before they are prompted to make their decisions.
+
+## Econometric Approach
+
+We will run a linear regression to checks if the treatment increases total cooperation across all rounds and adjusts for demographics and empathy
+
+```{r}
+model2 <- lm(coop_rate ~ con + sex + age + teq + iri_pt + iri_ec, data = pd)
+summary(model2)
+
+```
+
+This model predicts a participant’s **proportion of cooperative choices** (0–1) based on:
+
+-   `con`: treatment (imag = reference, word = dummy `conword`)
+
+-   `sex`: gender (F = reference, M = dummy)
+
+-   `age`: participant’s age
+
+-   `teq`, `iri_pt`, `iri_ec`: empathy-related scores
+
+Participants who imagined helping their partner cooperated significantly more (M = 78%) than those in the control group (M = 60%). The treatment group’s cooperation rate was on average 18 percentage points higher, even after controlling for gender, age, and empathy scores. None of these other variables significantly predicted cooperation.
+
+Next we will check for heteroskedasticity to make sure our p-values are valid and not too optimistic.
+
+```{r}
+# Plot residuals vs fitted values
+plot(model2, which = 1)
+
+```
+
+This graph shows us that heteroskedasticity is not present.
+
+We will now examine the round-level data to see how participants changed their behavior across rounds.
+
+```{r}
+library(tidyr)
+
+pd_long <- pd %>%
+  unnest_longer(cooperate_rounds) %>%  # Assuming you have a vector of round-by-round choices
+  mutate(round = row_number())
+
+```
+
+Checking for multicollinearity...
+
+```{r}
+library(car)
+vif(model2)
+
+```
