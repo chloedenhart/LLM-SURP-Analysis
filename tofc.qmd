@@ -21,7 +21,7 @@ tofc <- read_dta("GKQ_Dataset.dta")
 head(tofc)
 # filtering for only the maintenance treatment
 tofc_maint <- tofc |>
-  filter(cpp == 0)
+  filter(cpp == 0, experiment == 2|3)
 head(tofc_maint)
 ```
 
@@ -29,19 +29,95 @@ In this next section we will identify what percent of the participants cooperate
 
 ```{r}
 # Compute mean withdrawal per participant
-tofc_maint_summary <- tofc_maint %>%
-  group_by(id, strangers) %>%
+tofc_maint_summary <- tofc_maint |>
+  group_by(id, strangers) |>
   summarise(mean_withdrawal = mean(c), .groups = "drop")
 
 head(tofc_maint_summary)
 
 ```
 
-Some players were extremely selfish whereas others not so much. Let see how many players took all 20?
+| Variable    | Value | Meaning                                       |
+|-------------|-------|-----------------------------------------------|
+| `strangers` | `1`   | Groups **reshuffled** every round (Strangers) |
+| `strangers` | `0`   | Groups stayed **fixed** for all 20 rounds     |
+
+Table explains what the binary variable for strangers means. 1 means that every round groups were reshuffled therefore they were always with strangers. 0 means that the groups stayed fixed for all 20 rounds.
+
+Do participants claim more tokens when they are in a group with people they know or strangers. This chunk of code will help us compare the withdraws. Like comparing cooperation rate in Prisoners Dilemma simulation.
 
 ```{r}
-tofc_maint_summary |>
-  count(mean_withdrawal == 20)
+# Summary stats directly from round-level data
+tofc_maint |>
+  group_by(strangers) |>
+  summarise(
+    mean_withdrawal = mean(c, na.rm = TRUE),
+    sd_withdrawal = sd(c, na.rm = TRUE),
+    n = n_distinct(id)
+  )
+
 ```
 
-20 out of 432 participants chose all 20 tokens.
+304 participants in fixed group and 128 participants in shuffled. Participants in strangers = 1, meaning they were reshuffled each round (more like a one-shot game) withdrew and average of 1.74 tokens per round, whereas participants in mixed groups, meaning they were in shuffled groups withdrew only. The standard deviation is \~4.41, deviating from the \~1.74 amount. For the participants in fixed groups, same groups across 20 rounds (strangers = 0), the mean withdrawal per round was \~6.787 and the standard deviation was \~7.6
+
+We will run a t-test to ensure our results are statistically significant. The t-test compares the means of the two groups and tests.
+
+-   **H₀ (Null):** The true mean withdrawal is the same for strangers and partners
+
+-   **H₁ (Alternative):** The true mean withdrawal differs between the two
+
+Equivalent to t-test ran in PD simulation.
+
+```{r}
+# T-test comparing average withdrawals between strangers and partners
+t.test(c ~ strangers, data = tofc_maint)
+```
+
+Our t-statistic is quite large at 37.279, meaning that our results are far from what we may expect by chance. Since our p-value is \< 0.0001, our result is statistically significant. We’re 95% confident the true mean difference lies between 4.78 and 5.31 tokens per round. Because this interval does NOT include 0, the difference is significant.
+
+Now, we are running a linear regression on the participant level to identify the effect of the group type, which in this case is strangers.
+
+```{r}
+# Linear regression predicting withdrawals based on group type
+model1 <- lm(c ~ strangers, data = tofc_maint)
+summary(model1)
+```
+
+The results of the linear regression show us strangers drew 5.044 fewer tokens per round than partners and that is statistically significant because p\<0.001.
+
+Since we have all 20 rounds of data, we can check if the token withdraws differ across rounds. Is this trend different for strangers and partners?
+
+```{r}
+library(lme4)
+
+# Mixed-effects model: withdrawal ~ group type * round
+model2 <- lmer(c ~ period * strangers + (1 | id), data = tofc_maint)
+summary(model2)
+# c = number of tokens per round
+# strangers, 1 if reshuffled, 0 if fixed group
+# period = round number
+# period:strangers = interaction betwen both, does time trend differ for strangers?
+# Random effects: (1 | id) = each participant has their own baseline withdrawal level.
+```
+
+Our interpretation... intercept (6.393), in round one, participants in fixed groups (partners) withdrew \~6.39 tokens on average. Period, on average, for the fixed groups, withdrawal increased very slightly at \~0.01 tokens per round. Strangers, in round 1, participants withdrew \~3.45 less tokens than the fixed group. Period:strangers, as the rounds went on, they decreased their withdrawal by \~0.096 tokens, a higher rate than the partners group.
+
+Randomness effect... id (intercept) our variance is 29.54 and our standard deviation is 5.435, showing us there is xubstantial variability in baseline withdrawal between participants. The residual variance is 12.78 and standard deviation is 3.575 meaning there is additional variability within participants across rounds. This means individuals differ quite a lot in their baseline withdrawal tendencies.
+
+To help understand this better we will create a visual of average withdrawals per round.
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+tofc_maint |>
+  group_by(period, strangers) |>
+  summarise(mean_withdrawal = mean(c), .groups = "drop") |>
+  ggplot(aes(x = period, y = mean_withdrawal, color = factor(strangers))) +
+  geom_line(size = 1.2) +
+  labs(title = "Average Withdrawal by Round and Group Type",
+       x = "Round", y = "Tokens Withdrawn", color = "Strangers (1 = Yes)") +
+  theme_minimal()
+
+```
+
+This graph clearly shows us that participants in the strangers group (0), meaning that groups stay fixed for all 20 rounds started at a high baseline of token withdrawal and very slightly decreased per round until they got to the last few rounds they increased again. For stranger group (1), meaning participants were shuffled each round, they start at a much lower baseline for token withdrawal and they more rapidly decrease across rounds until they sort of plateau at round

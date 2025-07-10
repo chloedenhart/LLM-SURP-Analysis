@@ -8,7 +8,7 @@
 
 <meta name="author" content="Chloe Denhart">
 
-<title>Data Analysis</title>
+<title>Economic Simulation Data Analysis</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -80,7 +80,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Data Analysis</h1>
+<h1 class="title">Economic Simulation Data Analysis</h1>
 </div>
 
 
@@ -109,6 +109,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="data-analysis">Data Analysis</h2>
 <p>This dataset is from a study conducted by 120 undergraduate students.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load in data</span></span>
@@ -280,6 +282,193 @@ Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 </div>
 <p>The only statistically significant variable here for whether the participants decide to cooperate or defect on the first round is “conword” (or the condition word). Participants are less likely to cooperate on the first round when given words before they are prompted to make their decisions.</p>
+</section>
+<section id="econometric-approach" class="level2">
+<h2 class="anchored" data-anchor-id="econometric-approach">Econometric Approach</h2>
+<p>We will run a linear regression to checks if the treatment increases total cooperation across all rounds and adjusts for demographics and empathy</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(coop_rate <span class="sc">~</span> con <span class="sc">+</span> sex <span class="sc">+</span> age <span class="sc">+</span> teq <span class="sc">+</span> iri_pt <span class="sc">+</span> iri_ec, <span class="at">data =</span> pd)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = coop_rate ~ con + sex + age + teq + iri_pt + iri_ec, 
+    data = pd)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.8310 -0.3470  0.1540  0.2919  0.4888 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept)  0.353785   0.336225   1.052   0.2949  
+conword     -0.184379   0.071182  -2.590   0.0109 *
+sexM         0.009746   0.071138   0.137   0.8913  
+age          0.003405   0.015147   0.225   0.8225  
+teq          0.011439   0.006430   1.779   0.0779 .
+iri_pt       0.006034   0.009080   0.665   0.5077  
+iri_ec      -0.013575   0.012613  -1.076   0.2841  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3775 on 113 degrees of freedom
+Multiple R-squared:  0.09954,   Adjusted R-squared:  0.05172 
+F-statistic: 2.082 on 6 and 113 DF,  p-value: 0.06077</code></pre>
+</div>
+</div>
+<p>This model predicts a participant’s <strong>proportion of cooperative choices</strong>&nbsp;(0–1) based on:</p>
+<ul>
+<li><p><code>con</code>: treatment (imag = reference, word = dummy&nbsp;<code>conword</code>)</p></li>
+<li><p><code>sex</code>: gender (F = reference, M = dummy)</p></li>
+<li><p><code>age</code>: participant’s age</p></li>
+<li><p><code>teq</code>,&nbsp;<code>iri_pt</code>,&nbsp;<code>iri_ec</code>: empathy-related scores</p></li>
+</ul>
+<p>Participants who imagined helping their partner cooperated significantly more (M = 78%) than those in the control group (M = 60%). The treatment group’s cooperation rate was on average 18 percentage points higher, even after controlling for gender, age, and empathy scores. None of these other variables significantly predicted cooperation.</p>
+<p>Next we will check for heteroskedasticity to make sure our p-values are valid and not too optimistic.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot residuals vs fitted values</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(model2, <span class="at">which =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pd_analysis_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This graph shows us that heteroskedasticity is not present.</p>
+<p>We will now examine the round-level data to see how participants changed their behavior across rounds.</p>
+<p>Checking for multicollinearity…</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: carData</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'car'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    recode</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:purrr':
+
+    some</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vif</span>(model2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     con      sex      age      teq   iri_pt   iri_ec 
+1.066763 1.065441 1.068082 3.305221 1.348709 3.424700 </code></pre>
+</div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 7%">
+<col style="width: 77%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Predictor</th>
+<th>VIF</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>con</code></td>
+<td>1.07</td>
+<td>No multicollinearity (ideal).</td>
+</tr>
+<tr class="even">
+<td><code>sex</code></td>
+<td>1.07</td>
+<td>No multicollinearity.</td>
+</tr>
+<tr class="odd">
+<td><code>age</code></td>
+<td>1.07</td>
+<td>No multicollinearity.</td>
+</tr>
+<tr class="even">
+<td><code>teq</code></td>
+<td>3.31</td>
+<td>Moderate correlation with others, but&nbsp;<strong>not problematic</strong>.</td>
+</tr>
+<tr class="odd">
+<td><code>iri_pt</code></td>
+<td>1.35</td>
+<td>No multicollinearity.</td>
+</tr>
+<tr class="even">
+<td><code>iri_ec</code></td>
+<td>3.42</td>
+<td>Moderate correlation with others, but still acceptable.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="alex-data" class="level2">
+<h2 class="anchored" data-anchor-id="alex-data">Alex Data</h2>
+<p>The simulation we are using does not provide data for the partner “Alex”. We have to write code to understand what to feed the LLM.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># One set of Alex's decisions (Random 50/50)</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)  <span class="co"># For reproducibility</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>alex_choices <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">round =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">alex_choice =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dv">20</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>))</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="llm-data" class="level2">
+<h2 class="anchored" data-anchor-id="llm-data">LLM Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adding the LLMs data...</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the new participant as a tibble</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>new_row <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pid =</span> <span class="dv">6</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">con =</span> <span class="st">"word"</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">scen =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">sex =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">ethnic =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">words =</span> <span class="dv">10</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">describe =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">first.choice =</span> <span class="dv">1</span>,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">coop =</span> <span class="dv">8</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">delay =</span> <span class="dv">2</span>,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">teq =</span> <span class="dv">40</span>,</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_pt =</span> <span class="dv">21</span>,</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_fs =</span> <span class="dv">16</span>,</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_ec =</span> <span class="dv">23</span>,</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_pd =</span> <span class="dv">10</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Add it to the existing dataset</span></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(pd, new_row)</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a><span class="co"># View last few rows to confirm</span></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 18
+    pid con   scen  sex     age ethnic   alex  words describe first.choice  coop
+  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt;
+1  7137 word  &lt;NA&gt;  M        19 European M        24 &lt;NA&gt;                1    20
+2  7149 word  &lt;NA&gt;  M        18 East As… M        13 &lt;NA&gt;                0    11
+3  7152 word  &lt;NA&gt;  M        18 East As… M        11 &lt;NA&gt;                1    16
+4  7155 word  &lt;NA&gt;  M        22 East As… M        13 &lt;NA&gt;                1    20
+5  7160 word  &lt;NA&gt;  M        19 East As… M        12 &lt;NA&gt;                0     2
+6     6 word  &lt;NA&gt;  &lt;NA&gt;     NA &lt;NA&gt;     &lt;NA&gt;     10 &lt;NA&gt;                1     8
+# ℹ 7 more variables: delay &lt;dbl&gt;, teq &lt;dbl&gt;, iri_pt &lt;dbl&gt;, iri_fs &lt;dbl&gt;,
+#   iri_ec &lt;dbl&gt;, iri_pd &lt;dbl&gt;, coop_rate &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
 
 </main>
 <!-- /main column -->

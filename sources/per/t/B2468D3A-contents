@@ -116,6 +116,15 @@ This graph shows us that heteroskedasticity is not present.
 
 We will now examine the round-level data to see how participants changed their behavior across rounds.
 
+```{r}
+library(tidyr)
+
+pd_long <- pd %>%
+  unnest_longer(cooperate_rounds) %>%  # Assuming you have a vector of round-by-round choices
+  mutate(round = row_number())
+
+```
+
 Checking for multicollinearity...
 
 ```{r}
@@ -123,62 +132,3 @@ library(car)
 vif(model2)
 
 ```
-
-| Predictor | VIF  | Interpretation                                             |
-|-----------|------|------------------------------------------------------------|
-| `con`     | 1.07 | No multicollinearity (ideal).                              |
-| `sex`     | 1.07 | No multicollinearity.                                      |
-| `age`     | 1.07 | No multicollinearity.                                      |
-| `teq`     | 3.31 | Moderate correlation with others, but **not problematic**. |
-| `iri_pt`  | 1.35 | No multicollinearity.                                      |
-| `iri_ec`  | 3.42 | Moderate correlation with others, but still acceptable.    |
-
-## Alex Data
-The simulation we are using does not provide data for the partner "Alex". We have to write code to understand what to feed the LLM.
-
-```{r}
-library(tidyverse)
-
-# One set of Alex's decisions (Random 50/50)
-set.seed(123)  # For reproducibility
-alex_choices <- tibble(
-  round = 1:20,
-  alex_choice = sample(c(0, 1), 20, replace = TRUE, prob = c(0.5, 0.5))
-)
-
-```
-
-
-## LLM Data
-
-```{r}
-# adding the LLMs data...
-# Define the new participant as a tibble
-new_row <- tibble(
-  pid = 6,
-  con = "word",
-  scen = NA,
-  sex = NA,
-  age = NA,
-  ethnic = NA,
-  words = 10,
-  describe = NA,
-  first.choice = 1,
-  coop = 8,
-  delay = 2,
-  teq = 40,
-  iri_pt = 21,
-  iri_fs = 16,
-  iri_ec = 23,
-  iri_pd = 10
-)
-
-# Add it to the existing dataset
-pd <- bind_rows(pd, new_row)
-
-# View last few rows to confirm
-tail(pd)
-
-```
-
-

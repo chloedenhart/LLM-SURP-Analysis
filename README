@@ -1,0 +1,28 @@
+pid = participant ID
+con = condition (imagine helping vs. words filler task)
+scen = helping scenario used (subway vs. restaurant)
+sex = sex
+age = age
+ethnic = ethnic background
+alex = gender of PD game partner
+words = number of words typed in the filler task
+describe = participant's description of what he or she imagined
+first.choice = first choice in the PD game (X = cooperate; Y = defect)
+coop = number of cooperative choices (out of a total of 20 rounds)
+delay= number of rounds before first defect (20 = never defected)
+teq = score on Toronto Empathy Questionnaire
+iri_pt = score on Perspective Taking subscale of Interpersonal Reactivity Index
+iri_fs = score on Fantasy subscale of Interpersonal Reactivity Index
+iri_ec = score on Empathic Concern subscale of Interpersonal Reactivity Index
+iri_pd = score on Personal Distress subscale of Interpersonal Reactivity Index
+
+alex_choices:
+data on alexs choices... 1 is cooperate, 0 is defect.
+
+LLM player ids
+1: General LLM, no characteristics GPT 4.1 - mini
+2: "Aggressive" LLM
+3: "Smart" LLM
+4: "Considerate" LLM
+5: "Kind" LLM
+6: General LLM, no characteristics 
