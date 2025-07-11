@@ -431,41 +431,43 @@ Attaching package: 'car'</code></pre>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adding the LLMs data...</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the new participant as a tibble</span></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>new_row <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pid =</span> <span class="dv">6</span>,</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">con =</span> <span class="st">"word"</span>,</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">scen =</span> <span class="cn">NA</span>,</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">sex =</span> <span class="cn">NA</span>,</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="cn">NA</span>,</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">ethnic =</span> <span class="cn">NA</span>,</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">words =</span> <span class="dv">10</span>,</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">describe =</span> <span class="cn">NA</span>,</span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">first.choice =</span> <span class="dv">1</span>,</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">coop =</span> <span class="dv">8</span>,</span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">delay =</span> <span class="dv">2</span>,</span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">teq =</span> <span class="dv">40</span>,</span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_pt =</span> <span class="dv">21</span>,</span>
-<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_fs =</span> <span class="dv">16</span>,</span>
-<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_ec =</span> <span class="dv">23</span>,</span>
-<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_pd =</span> <span class="dv">10</span></span>
-<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Add it to the existing dataset</span></span>
-<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(pd, new_row)</span>
-<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a><span class="co"># View last few rows to confirm</span></span>
-<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pid =</span> <span class="dv">17</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  ,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">con =</span> <span class="st">"word"</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">scen =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">sex =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">ethnic =</span> <span class="cn">NA</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">words =</span> <span class="dv">10</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">describe =</span> <span class="st">"I’m picturing myself in a restaurant, noticing someone choking on their food. As a healthcare worker, I quickly step in, calmly perform the Heimlich maneuver, and help them breathe again. "</span>,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">first.choice =</span> <span class="dv">1</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">coop =</span> <span class="dv">8</span>,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">delay =</span> <span class="dv">3</span>,</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">teq =</span> <span class="dv">53</span>,</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_pt =</span> <span class="dv">25</span>,</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_fs =</span> <span class="dv">20</span>,</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_ec =</span> <span class="dv">26</span>,</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">iri_pd =</span> <span class="dv">18</span>,</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">occupation =</span> <span class="st">"healthcare employee"</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Add it to the existing dataset</span></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(pd, new_row)</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a><span class="co"># View last few rows to confirm</span></span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 18
+<pre><code># A tibble: 6 × 19
     pid con   scen  sex     age ethnic   alex  words describe first.choice  coop
   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt;
-1  7137 word  &lt;NA&gt;  M        19 European M        24 &lt;NA&gt;                1    20
-2  7149 word  &lt;NA&gt;  M        18 East As… M        13 &lt;NA&gt;                0    11
-3  7152 word  &lt;NA&gt;  M        18 East As… M        11 &lt;NA&gt;                1    16
-4  7155 word  &lt;NA&gt;  M        22 East As… M        13 &lt;NA&gt;                1    20
-5  7160 word  &lt;NA&gt;  M        19 East As… M        12 &lt;NA&gt;                0     2
-6     6 word  &lt;NA&gt;  &lt;NA&gt;     NA &lt;NA&gt;     &lt;NA&gt;     10 &lt;NA&gt;                1     8
-# ℹ 7 more variables: delay &lt;dbl&gt;, teq &lt;dbl&gt;, iri_pt &lt;dbl&gt;, iri_fs &lt;dbl&gt;,
-#   iri_ec &lt;dbl&gt;, iri_pd &lt;dbl&gt;, coop_rate &lt;dbl&gt;</code></pre>
+1  7137 word  &lt;NA&gt;  M        19 European M        24  &lt;NA&gt;               1    20
+2  7149 word  &lt;NA&gt;  M        18 East As… M        13  &lt;NA&gt;               0    11
+3  7152 word  &lt;NA&gt;  M        18 East As… M        11  &lt;NA&gt;               1    16
+4  7155 word  &lt;NA&gt;  M        22 East As… M        13  &lt;NA&gt;               1    20
+5  7160 word  &lt;NA&gt;  M        19 East As… M        12  &lt;NA&gt;               0     2
+6    17 word  &lt;NA&gt;  &lt;NA&gt;     NA &lt;NA&gt;     &lt;NA&gt;     10 "I’m pi…            1     8
+# ℹ 8 more variables: delay &lt;dbl&gt;, teq &lt;dbl&gt;, iri_pt &lt;dbl&gt;, iri_fs &lt;dbl&gt;,
+#   iri_ec &lt;dbl&gt;, iri_pd &lt;dbl&gt;, coop_rate &lt;dbl&gt;, occupation &lt;chr&gt;</code></pre>
 </div>
 </div>
 </section>

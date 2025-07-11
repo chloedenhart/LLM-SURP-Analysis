@@ -155,22 +155,24 @@ alex_choices <- tibble(
 # adding the LLMs data...
 # Define the new participant as a tibble
 new_row <- tibble(
-  pid = 6,
+  pid = 17
+  ,
   con = "word",
   scen = NA,
   sex = NA,
   age = NA,
   ethnic = NA,
   words = 10,
-  describe = NA,
+  describe = "I’m picturing myself in a restaurant, noticing someone choking on their food. As a healthcare worker, I quickly step in, calmly perform the Heimlich maneuver, and help them breathe again. ",
   first.choice = 1,
   coop = 8,
-  delay = 2,
-  teq = 40,
-  iri_pt = 21,
-  iri_fs = 16,
-  iri_ec = 23,
-  iri_pd = 10
+  delay = 3,
+  teq = 53,
+  iri_pt = 25,
+  iri_fs = 20,
+  iri_ec = 26,
+  iri_pd = 18,
+  occupation = "healthcare employee"
 )
 
 # Add it to the existing dataset
@@ -178,7 +180,7 @@ pd <- bind_rows(pd, new_row)
 
 # View last few rows to confirm
 tail(pd)
-
 ```
+
 
 

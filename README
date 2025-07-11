@@ -26,3 +26,5 @@ LLM player ids
 4: "Considerate" LLM
 5: "Kind" LLM
 6: General LLM, no characteristics 
+7: "Aggressive" LLM
+8: "Smart" LLM
