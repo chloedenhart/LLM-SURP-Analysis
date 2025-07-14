@@ -149,38 +149,65 @@ alex_choices <- tibble(
 ```
 
 
-## LLM Data
+## LLM Data Analysis
 
 ```{r}
-# adding the LLMs data...
-# Define the new participant as a tibble
-new_row <- tibble(
-  pid = 17
-  ,
-  con = "word",
-  scen = NA,
-  sex = NA,
-  age = NA,
-  ethnic = NA,
-  words = 10,
-  describe = "I’m picturing myself in a restaurant, noticing someone choking on their food. As a healthcare worker, I quickly step in, calmly perform the Heimlich maneuver, and help them breathe again. ",
-  first.choice = 1,
-  coop = 8,
-  delay = 3,
-  teq = 53,
-  iri_pt = 25,
-  iri_fs = 20,
-  iri_ec = 26,
-  iri_pd = 18,
-  occupation = "healthcare employee"
-)
+library(tidyverse)
 
-# Add it to the existing dataset
-pd <- bind_rows(pd, new_row)
+# Load your new PD data
+llm_pd <- read_csv("SURP LLM Responses PD.csv") |>
+  mutate(coop_rate = coop / 20)  # Make sure coop_rate is calculated if needed
 
-# View last few rows to confirm
-tail(pd)
+```
+```{r}
+# summarize cooperation by condition for LLM data
+llm_summary <- llm_pd |>
+  group_by(con) |>
+  summarise(
+    mean_rate = mean(coop_rate, na.rm = TRUE),
+    sd_rate = sd(coop_rate, na.rm = TRUE),
+    n = n()
+  ) |>
+  mutate(dataset = "LLM")
+llm_summary
+
 ```
 
+```{r}
+# original summary
+original_summary <- pd %>%
+  group_by(con) %>%
+  summarise(
+    mean_rate = mean(coop_rate, na.rm = TRUE),
+    sd_rate = sd(coop_rate, na.rm = TRUE),
+    n = n()
+  ) %>%
+  mutate(dataset = "Original")
 
+```
+
+```{r}
+comparison_summary <- bind_rows(original_summary, llm_summary)
+comparison_summary
+```
+
+```{r}
+# visualized comparison
+library(ggplot2)
+
+ggplot(comparison_summary, aes(x = con, y = mean_rate, fill = dataset)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(title = "Cooperation Rates: Original vs LLM PD",
+       x = "Condition",
+       y = "Mean Cooperation Rate") +
+  theme_minimal()
+
+```
+
+Here we compare our human data to our LLMs data. We can see here that for the LLMs that have a much lower average cooperation rate. With the mean rate for the image condition differing by ~.34 with a similar standard deviation. Additionally, we have a difference in the mean rate for the word condition differing by ~.23 and a much smaller standard deviation of ~.1 compared to .39. Are LLMs less likely to cooperate because they lack human empathy and emotions?
+
+```{r}
+t.test(coop_rate ~ con, data = pd)      # Original
+t.test(coop_rate ~ con, data = llm_pd)  # LLM
+```
 

@@ -1,0 +1,19 @@
+pid,con,first.choice,coop,delay,teq,iri_pt,iri_fs,iri_ec,iri_pd,character
+1,imag,1,5,3,42,23,22,21,18,general
+2,imag,0,0,20,15,8,6,7,5,aggressive
+3,imag,1,4,3,28,10,8,12,6,smart
+4,imag,1,20,0,52,26,21,27,18,considerate
+5,imag,1,18,10,64,28,28,28,17.5,kind
+6,word,1,6,2,35,28,26,30,22,general
+7,word,0,4,0,34,18,22,16,20,aggressive
+8,word,1,9,3,37,15,21,16,20,smart
+9,word,1,10,2,48,22,20,24,16,considerate
+10,word,1,6,2,30,18,22,20,16,kind
+12,imag,1,6,3,37,15,21,26,10,student
+13,imag,1,7,2,40,18,10,16,8,retail worker
+14,imag,1,7,3,47,21,21,24,13,office employee
+15,imag,1,7,6,46,28,12,28,10,healthcare worker
+16,word,1,7,2,50,23,20,25,16,student
+17,word,1,8,3,42,19,17,21,14,retail worker
+18,word,1,7,3,46,19,16,21,12,office employee
+19,word,1,9,3,52,23,18,25,14,healthcare worker
