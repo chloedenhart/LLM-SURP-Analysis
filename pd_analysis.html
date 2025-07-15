@@ -536,6 +536,204 @@ mean in group imag mean in group word
          0.4111111          0.3666667 </code></pre>
 </div>
 </div>
+<p>Our t-test for the LLMs is large at 0.7 where our t statistic is low at ~0.39 showing us that this is not statistically significant. In this case there is no evidence for a difference in the image condition versus the word condition, further allowing us to understand that LLMs still lack the human emotion necessary to make human-based decisions. The difference in significance could also be due the much smaller sample size in the LLM responses (a data limitation). The VIF results show no problematic multicollinearity in your regression predictors, which means your regression results are stable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Distribution comparison</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">data =</span> pd, <span class="fu">aes</span>(<span class="at">x =</span> coop_rate, <span class="at">fill =</span> <span class="st">"Human"</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">data =</span> llm_pd, <span class="fu">aes</span>(<span class="at">x =</span> coop_rate, <span class="at">fill =</span> <span class="st">"LLM"</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Cooperation Rate Distributions"</span>, <span class="at">x =</span> <span class="st">"Cooperation Rate"</span>, <span class="at">fill =</span> <span class="st">"Dataset"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pd_analysis_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Our human distribution (red) has a bimodal shape with two clear peaks, one peak close to 0 (very low cooperation rate) and another peak near 1 (very high cooperation rate).This suggests humans tend to cluster at extremes—either mostly cooperating or mostly defecting. LLM distribution (blue-green) shows a unimodal peak centered roughly around 0.25–0.35 cooperation rate. This indicates LLMs tend to have more moderate cooperation, generally cooperating less often and not clustering at the extremes. Can also mean they tend more to just go tit for tat.</p>
+</section>
+<section id="personality-test-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="personality-test-analysis">Personality Test Analysis</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># summary statistics for each survey across human generated and LLM generated responses</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>pd <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_teq =</span> <span class="fu">mean</span>(teq, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_teq =</span> <span class="fu">sd</span>(teq, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_pt =</span> <span class="fu">mean</span>(iri_pt, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_pt =</span> <span class="fu">sd</span>(iri_pt, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_ec =</span> <span class="fu">mean</span>(iri_ec, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_ec =</span> <span class="fu">sd</span>(iri_ec, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_fs =</span> <span class="fu">mean</span>(iri_fs, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_fs =</span> <span class="fu">sd</span>(iri_fs, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_pd =</span> <span class="fu">mean</span>(iri_pd, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_pd =</span> <span class="fu">sd</span>(iri_pd, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 10
+  mean_teq sd_teq mean_iri_pt sd_iri_pt mean_iri_ec sd_iri_ec mean_iri_fs
+     &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+1     43.7   9.78        18.0      4.43        18.3      5.08        17.4
+# ℹ 3 more variables: sd_iri_fs &lt;dbl&gt;, mean_iri_pd &lt;dbl&gt;, sd_iri_pd &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>llm_pd <span class="sc">|&gt;</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_teq =</span> <span class="fu">mean</span>(teq, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_teq =</span> <span class="fu">sd</span>(teq, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_pt =</span> <span class="fu">mean</span>(iri_pt, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_pt =</span> <span class="fu">sd</span>(iri_pt, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_ec =</span> <span class="fu">mean</span>(iri_ec, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_ec =</span> <span class="fu">sd</span>(iri_ec, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_fs =</span> <span class="fu">mean</span>(iri_fs, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_fs =</span> <span class="fu">sd</span>(iri_fs, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_iri_pd =</span> <span class="fu">mean</span>(iri_pd, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_iri_pd =</span> <span class="fu">sd</span>(iri_pd, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 10
+  mean_teq sd_teq mean_iri_pt sd_iri_pt mean_iri_ec sd_iri_ec mean_iri_fs
+     &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+1     41.4   11.0        20.1      5.78        21.5      6.13        18.4
+# ℹ 3 more variables: sd_iri_fs &lt;dbl&gt;, mean_iri_pd &lt;dbl&gt;, sd_iri_pd &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>For humans, mean teq was ~43.6 with sd of ~9.78. Mean iri_pt was ~17.9 with sd of ~4.42. Mean iri_ec was 18.266 with sd of ~5.07. Mean for iri_fs is 17.425 with sd of 5.43. Mean iri_pd is 12 with sd of 4.31.</p>
+<p>For LLMs mean teq is ~41.388 with sd of 11.03. Mean iri_pt is 20.11 and sd is 5.779. Mean iri_ec 21.5 with sd of 6.12. Mean iri_fs 18.388 with sd of 5.95. Mean iri_pd 14.19 with sd of 4.9.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming you have two datasets: pd (Humans) and llm_pd (LLMs)</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Add group labels</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> pd <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">group =</span> <span class="st">"Human"</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>llm_pd <span class="ot">&lt;-</span> llm_pd <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">group =</span> <span class="st">"LLM"</span>)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>combined <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(pd, llm_pd)</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Gather empathy scores into long format</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>empathy_long <span class="ot">&lt;-</span> combined <span class="sc">%&gt;%</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(group, teq, iri_pt, iri_ec, iri_fs, iri_pd) <span class="sc">%&gt;%</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>group, <span class="at">names_to =</span> <span class="st">"measure"</span>, <span class="at">values_to =</span> <span class="st">"score"</span>)</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute mean scores by group and measure</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>empathy_summary <span class="ot">&lt;-</span> empathy_long <span class="sc">%&gt;%</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(group, measure) <span class="sc">%&gt;%</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_score =</span> <span class="fu">mean</span>(score, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(empathy_summary, <span class="fu">aes</span>(<span class="at">x =</span> measure, <span class="at">y =</span> mean_score, <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>()) <span class="sc">+</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Mean Empathy Scores by Group"</span>,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Empathy Measure"</span>,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Mean Score"</span>) <span class="sc">+</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Human"</span> <span class="ot">=</span> <span class="st">"#E69F00"</span>, <span class="st">"LLM"</span> <span class="ot">=</span> <span class="st">"#56B4E9"</span>)) <span class="sc">+</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pd_analysis_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This shows us that almost every value is larger for the LLMs except for in the teq survey.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(psych)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'psych'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:car':
+
+    logit</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:ggplot2':
+
+    %+%, alpha</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>numeric_data <span class="ot">&lt;-</span> pd <span class="sc">|&gt;</span> <span class="fu">select</span>(coop_rate, teq, iri_pt, iri_ec, iri_fs, iri_pd)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corr.test</span>(numeric_data)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(result<span class="sc">$</span>r)    <span class="co"># correlations</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            coop_rate       teq      iri_pt    iri_ec    iri_fs      iri_pd
+coop_rate  1.00000000 0.1815809  0.15172012 0.1243219 0.1254677 -0.09774147
+teq        0.18158093 1.0000000  0.42826677 0.8280145 0.4901090  0.19745846
+iri_pt     0.15172012 0.4282668  1.00000000 0.4359834 0.2546229 -0.00608766
+iri_ec     0.12432193 0.8280145  0.43598342 1.0000000 0.4618282  0.31710974
+iri_fs     0.12546773 0.4901090  0.25462292 0.4618282 1.0000000  0.30712358
+iri_pd    -0.09774147 0.1974585 -0.00608766 0.3171097 0.3071236  1.00000000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(result<span class="sc">$</span>p)    <span class="co"># p-values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           coop_rate          teq       iri_pt       iri_ec       iri_fs
+coop_rate 0.00000000 2.829790e-01 4.904290e-01 6.884511e-01 6.884511e-01
+teq       0.04716317 0.000000e+00 1.169672e-05 2.966871e-30 1.867045e-07
+iri_pt    0.09808579 1.063338e-06 0.000000e+00 7.736838e-06 4.006992e-02
+iri_ec    0.17609440 1.977914e-31 6.447365e-07 0.000000e+00 1.429862e-06
+iri_fs    0.17211277 1.333604e-08 5.008739e-03 1.099894e-07 0.000000e+00
+iri_pd    0.28821639 3.063825e-02 9.473861e-01 4.172337e-04 6.448670e-04
+               iri_pd
+coop_rate 0.688451081
+teq       0.214467731
+iri_pt    0.947386132
+iri_ec    0.004172337
+iri_fs    0.005803803
+iri_pd    0.000000000</code></pre>
+</div>
+</div>
+<p>This shows us theer are no strong correlations between the personality tests and the cooperation rates for humans.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>numeric_data <span class="ot">&lt;-</span> llm_pd <span class="sc">|&gt;</span> <span class="fu">select</span>(coop_rate, teq, iri_pt, iri_ec, iri_fs, iri_pd)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">corr.test</span>(numeric_data)</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(result<span class="sc">$</span>r)    <span class="co"># correlations</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          coop_rate       teq    iri_pt    iri_ec    iri_fs    iri_pd
+coop_rate 1.0000000 0.7844071 0.6065930 0.5793175 0.4940146 0.4123920
+teq       0.7844071 1.0000000 0.7731356 0.7440896 0.5187691 0.3769860
+iri_pt    0.6065930 0.7731356 1.0000000 0.8835721 0.6074528 0.5819047
+iri_ec    0.5793175 0.7440896 0.8835721 1.0000000 0.6635765 0.4844728
+iri_fs    0.4940146 0.5187691 0.6074528 0.6635765 1.0000000 0.8710907
+iri_pd    0.4123920 0.3769860 0.5819047 0.4844728 0.8710907 1.0000000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(result<span class="sc">$</span>p)    <span class="co"># p-values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             coop_rate          teq       iri_pt       iri_ec       iri_fs
+coop_rate 0.0000000000 0.0015116843 6.748903e-02 7.906219e-02 1.487241e-01
+teq       0.0001162834 0.0000000000 2.018477e-03 4.388439e-03 1.369566e-01
+iri_pt    0.0076070075 0.0001682064 0.000000e+00 1.756729e-05 6.748903e-02
+iri_ec    0.0117518492 0.0003989490 1.171153e-06 0.000000e+00 2.677672e-02
+iri_fs    0.0371810137 0.0273913105 7.498781e-03 2.677672e-03 0.000000e+00
+iri_pd    0.0890033979 0.1230398275 1.129460e-02 4.159864e-02 2.539091e-06
+                iri_pd
+coop_rate 1.780068e-01
+teq       1.780068e-01
+iri_pt    7.906219e-02
+iri_ec    1.487241e-01
+iri_fs    3.554728e-05
+iri_pd    0.000000e+00</code></pre>
+</div>
+</div>
+<p>For the LLMs we have moderate to strong positive correlations for all personality surveys.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>combined <span class="sc">|&gt;</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(<span class="at">key =</span> <span class="st">"measure"</span>, <span class="at">value =</span> <span class="st">"score"</span>, teq, iri_pt, iri_ec, iri_fs, iri_pd) <span class="sc">|&gt;</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> score, <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> measure, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Empathy Score Distributions by Group"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pd_analysis_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 
 </main>

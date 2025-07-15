@@ -210,4 +210,120 @@ Here we compare our human data to our LLMs data. We can see here that for the LL
 t.test(coop_rate ~ con, data = pd)      # Original
 t.test(coop_rate ~ con, data = llm_pd)  # LLM
 ```
+Our t-test for the LLMs is large at 0.7 where our t statistic is low at ~0.39 showing us that this is not statistically significant. In this case there is no evidence for a difference in the image condition versus the word condition, further allowing us to understand that LLMs still lack the human emotion necessary to make human-based decisions. The difference in significance could also be due the much smaller sample size in the LLM responses (a data limitation). The VIF results show no problematic multicollinearity in your regression predictors, which means your regression results are stable.
+
+```{r}
+# Distribution comparison
+ggplot() +
+  geom_density(data = pd, aes(x = coop_rate, fill = "Human"), alpha = 0.5) +
+  geom_density(data = llm_pd, aes(x = coop_rate, fill = "LLM"), alpha = 0.5) +
+  labs(title = "Cooperation Rate Distributions", x = "Cooperation Rate", fill = "Dataset")
+
+```
+Our human distribution (red) has a bimodal shape with two clear peaks, one peak close to 0 (very low cooperation rate) and another peak near 1 (very high cooperation rate).This suggests humans tend to cluster at extremes—either mostly cooperating or mostly defecting. LLM distribution (blue-green) shows a unimodal peak centered roughly around 0.25–0.35 cooperation rate. This indicates LLMs tend to have more moderate cooperation, generally cooperating less often and not clustering at the extremes. Can also mean they tend more to just go tit for tat.
+
+## Personality Test Analysis
+```{r}
+# summary statistics for each survey across human generated and LLM generated responses
+pd |>
+  summarise(
+    mean_teq = mean(teq, na.rm = TRUE),
+    sd_teq = sd(teq, na.rm = TRUE),
+    mean_iri_pt = mean(iri_pt, na.rm = TRUE),
+    sd_iri_pt = sd(iri_pt, na.rm = TRUE),
+    mean_iri_ec = mean(iri_ec, na.rm = TRUE),
+    sd_iri_ec = sd(iri_ec, na.rm = TRUE),
+    mean_iri_fs = mean(iri_fs, na.rm = TRUE),
+    sd_iri_fs = sd(iri_fs, na.rm = TRUE),
+    mean_iri_pd = mean(iri_pd, na.rm = TRUE),
+    sd_iri_pd = sd(iri_pd, na.rm = TRUE)
+  )
+
+llm_pd |>
+  summarise(
+    mean_teq = mean(teq, na.rm = TRUE),
+    sd_teq = sd(teq, na.rm = TRUE),
+    mean_iri_pt = mean(iri_pt, na.rm = TRUE),
+    sd_iri_pt = sd(iri_pt, na.rm = TRUE),
+    mean_iri_ec = mean(iri_ec, na.rm = TRUE),
+    sd_iri_ec = sd(iri_ec, na.rm = TRUE),
+    mean_iri_fs = mean(iri_fs, na.rm = TRUE),
+    sd_iri_fs = sd(iri_fs, na.rm = TRUE),
+    mean_iri_pd = mean(iri_pd, na.rm = TRUE),
+    sd_iri_pd = sd(iri_pd, na.rm = TRUE)
+  )
+
+```
+
+For humans, mean teq was ~43.6 with sd of ~9.78. Mean iri_pt was ~17.9 with sd of ~4.42. Mean iri_ec was 18.266 with sd of ~5.07. Mean for iri_fs is 17.425 with sd of 5.43. Mean iri_pd is 12 with sd of 4.31.
+
+For LLMs mean teq is ~41.388 with sd of 11.03. Mean iri_pt is 20.11 and sd is 5.779. Mean iri_ec 21.5 with sd of 6.12. Mean iri_fs 18.388 with sd of 5.95. Mean iri_pd 14.19 with sd of 4.9.
+
+```{r}
+
+# Assuming you have two datasets: pd (Humans) and llm_pd (LLMs)
+# Add group labels
+pd <- pd %>% mutate(group = "Human")
+llm_pd <- llm_pd %>% mutate(group = "LLM")
+
+# Combine
+combined <- bind_rows(pd, llm_pd)
+
+# Gather empathy scores into long format
+empathy_long <- combined %>%
+  select(group, teq, iri_pt, iri_ec, iri_fs, iri_pd) %>%
+  pivot_longer(cols = -group, names_to = "measure", values_to = "score")
+
+# Compute mean scores by group and measure
+empathy_summary <- empathy_long %>%
+  group_by(group, measure) %>%
+  summarise(mean_score = mean(score, na.rm = TRUE), .groups = "drop")
+
+```
+
+```{r}
+ggplot(empathy_summary, aes(x = measure, y = mean_score, fill = group)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(title = "Mean Empathy Scores by Group",
+       x = "Empathy Measure",
+       y = "Mean Score") +
+  scale_fill_manual(values = c("Human" = "#E69F00", "LLM" = "#56B4E9")) +
+  theme_minimal()
+
+```
+This shows us that almost every value is larger for the LLMs except for in the teq survey. 
+
+```{r}
+library(psych)
+
+numeric_data <- pd |> select(coop_rate, teq, iri_pt, iri_ec, iri_fs, iri_pd)
+
+result <- corr.test(numeric_data)
+
+print(result$r)    # correlations
+print(result$p)    # p-values
+
+```
+
+This shows us theer are no strong correlations between the personality tests and the cooperation rates for humans. 
+
+```{r}
+numeric_data <- llm_pd |> select(coop_rate, teq, iri_pt, iri_ec, iri_fs, iri_pd)
+
+result <- corr.test(numeric_data)
+
+print(result$r)    # correlations
+print(result$p)    # p-values
+```
+For the LLMs we have moderate to strong positive correlations for all personality surveys. 
+
+```{r}
+combined |>
+  gather(key = "measure", value = "score", teq, iri_pt, iri_ec, iri_fs, iri_pd) |>
+  ggplot(aes(x = score, fill = group)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ measure, scales = "free") +
+  labs(title = "Empathy Score Distributions by Group")
+
+```
 
