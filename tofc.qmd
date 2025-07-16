@@ -21,7 +21,7 @@ tofc <- read_dta("GKQ_Dataset.dta")
 head(tofc)
 # filtering for only the maintenance treatment
 tofc_maint <- tofc |>
-  filter(cpp == 0, experiment == 2|3)
+  filter(cpp == 0, experiment %in% c(2, 3))
 head(tofc_maint)
 ```
 

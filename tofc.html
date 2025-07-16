@@ -147,18 +147,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filtering for only the maintenance treatment</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tofc_maint <span class="ot">&lt;-</span> tofc <span class="sc">|&gt;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(cpp <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(cpp <span class="sc">==</span> <span class="dv">0</span>, experiment <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tofc_maint)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 46
   experiment session   cpp    id groupid    mg period oneshot strangers partners
   &lt;dbl+lbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-1 1 [One-sh…      10     0   149    1001  1001      1       1         0        0
-2 1 [One-sh…      10     0   150    1001  1001      1       1         0        0
-3 1 [One-sh…      10     0   151    1001  1001      1       1         0        0
-4 1 [One-sh…      10     0   152    1001  1001      1       1         0        0
-5 1 [One-sh…      10     0   153    1002  1002      1       1         0        0
-6 1 [One-sh…      10     0   154    1002  1002      1       1         0        0
+1 2 [Strang…      20     0   321    2007     3      1       0         1        0
+2 2 [Strang…      20     0   321    2007     3      2       0         1        0
+3 2 [Strang…      20     0   321    2005     3      3       0         1        0
+4 2 [Strang…      20     0   321    2005     3      4       0         1        0
+5 2 [Strang…      20     0   321    2007     3      5       0         1        0
+6 2 [Strang…      20     0   321    2005     3      6       0         1        0
 # ℹ 36 more variables: punishment &lt;dbl&gt;, type &lt;dbl+lbl&gt;, CC &lt;dbl&gt;, FR &lt;dbl&gt;,
 #   OT &lt;dbl&gt;, c &lt;dbl&gt;, b &lt;dbl&gt;, c_other &lt;dbl&gt;, lag_c_other &lt;dbl&gt;, pgsize &lt;dbl&gt;,
 #   pun &lt;dbl&gt;, pun_received &lt;dbl&gt;, pc &lt;dbl&gt;, dev_pc &lt;dbl&gt;, u &lt;dbl&gt;, cc0 &lt;dbl&gt;,
@@ -171,8 +171,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>In this next section we will identify what percent of the participants cooperated across rounds versus defected. It will allow for us to understand if the subjects were considerate of other people and the resource as a whole or if they were selfish.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute mean withdrawal per participant</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>tofc_maint_summary <span class="ot">&lt;-</span> tofc_maint <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id, strangers) <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>tofc_maint_summary <span class="ot">&lt;-</span> tofc_maint <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id, strangers) <span class="sc">|&gt;</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_withdrawal =</span> <span class="fu">mean</span>(c), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tofc_maint_summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -180,27 +180,187 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code># A tibble: 6 × 3
      id strangers mean_withdrawal
   &lt;dbl&gt;     &lt;dbl&gt;           &lt;dbl&gt;
-1   149         0              20
-2   150         0               4
-3   151         0               0
-4   152         0              20
-5   153         0               0
-6   154         0               5</code></pre>
+1   321         1           0    
+2   322         1           0.778
+3   323         1           0.556
+4   324         1           1.44 
+5   325         1           1.52 
+6   326         1           0    </code></pre>
 </div>
 </div>
-<p>Some players were extremely selfish whereas others not so much. Let see how many players took all 20?</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>strangers</code></td>
+<td><code>1</code></td>
+<td>Groups&nbsp;<strong>reshuffled</strong>&nbsp;every round (Strangers)</td>
+</tr>
+<tr class="even">
+<td><code>strangers</code></td>
+<td><code>0</code></td>
+<td>Groups stayed&nbsp;<strong>fixed</strong>&nbsp;for all 20 rounds</td>
+</tr>
+</tbody>
+</table>
+<p>Table explains what the binary variable for strangers means. 1 means that every round groups were reshuffled therefore they were always with strangers. 0 means that the groups stayed fixed for all 20 rounds.</p>
+<p>Do participants claim more tokens when they are in a group with people they know or strangers. This chunk of code will help us compare the withdraws. Like comparing cooperation rate in Prisoners Dilemma simulation.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tofc_maint_summary <span class="sc">|&gt;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(mean_withdrawal <span class="sc">==</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary stats directly from round-level data</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>tofc_maint <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(strangers) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_withdrawal =</span> <span class="fu">mean</span>(c, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_withdrawal =</span> <span class="fu">sd</span>(c, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n_distinct</span>(id)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 2
-  `mean_withdrawal == 20`     n
-  &lt;lgl&gt;                   &lt;int&gt;
-1 FALSE                     412
-2 TRUE                       20</code></pre>
+<pre><code># A tibble: 2 × 4
+  strangers mean_withdrawal sd_withdrawal     n
+      &lt;dbl&gt;           &lt;dbl&gt;         &lt;dbl&gt; &lt;int&gt;
+1         0            2.64          5.21    80
+2         1            1.74          4.41   128</code></pre>
 </div>
 </div>
-<p>20 out of 432 participants chose all 20 tokens.</p>
+<p>304 participants in fixed group and 128 participants in shuffled. Participants in strangers = 1, meaning they were reshuffled each round (more like a one-shot game) withdrew and average of 1.74 tokens per round, whereas participants in mixed groups, meaning they were in shuffled groups withdrew only. The standard deviation is ~4.41, deviating from the ~1.74 amount. For the participants in fixed groups, same groups across 20 rounds (strangers = 0), the mean withdrawal per round was ~6.787 and the standard deviation was ~7.6</p>
+<p>We will run a t-test to ensure our results are statistically significant. The t-test compares the means of the two groups and tests.</p>
+<ul>
+<li><p><strong>H₀ (Null):</strong>&nbsp;The true mean withdrawal is the same for strangers and partners</p></li>
+<li><p><strong>H₁ (Alternative):</strong>&nbsp;The true mean withdrawal differs between the two</p></li>
+</ul>
+<p>Equivalent to t-test ran in PD simulation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># T-test comparing average withdrawals between strangers and partners</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(c <span class="sc">~</span> strangers, <span class="at">data =</span> tofc_maint)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  c by strangers
+t = 6.6562, df = 4024.5, p-value = 3.188e-11
+alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
+95 percent confidence interval:
+ 0.6333994 1.1623182
+sample estimates:
+mean in group 0 mean in group 1 
+       2.641204        1.743345 </code></pre>
+</div>
+</div>
+<p>Our t-statistic is quite large at 37.279, meaning that our results are far from what we may expect by chance. Since our p-value is &lt; 0.0001, our result is statistically significant. We’re 95% confident the true mean difference lies between 4.78 and 5.31 tokens per round. Because this interval does NOT include 0, the difference is significant.</p>
+<p>Now, we are running a linear regression on the participant level to identify the effect of the group type, which in this case is strangers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Linear regression predicting withdrawals based on group type</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(c <span class="sc">~</span> strangers, <span class="at">data =</span> tofc_maint)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = c ~ strangers, data = tofc_maint)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.6412 -2.6412 -1.7433 -0.7433 18.2567 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   2.6412     0.1019  25.925  &lt; 2e-16 ***
+strangers    -0.8979     0.1299  -6.914 5.25e-12 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 4.735 on 5614 degrees of freedom
+Multiple R-squared:  0.008442,  Adjusted R-squared:  0.008266 
+F-statistic:  47.8 on 1 and 5614 DF,  p-value: 5.251e-12</code></pre>
+</div>
+</div>
+<p>The results of the linear regression show us strangers drew 5.044 fewer tokens per round than partners and that is statistically significant because p&lt;0.001.</p>
+<p>Since we have all 20 rounds of data, we can check if the token withdraws differ across rounds. Is this trend different for strangers and partners?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Matrix</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'Matrix'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Mixed-effects model: withdrawal ~ group type * round</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(c <span class="sc">~</span> period <span class="sc">*</span> strangers <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> id), <span class="at">data =</span> tofc_maint)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: c ~ period * strangers + (1 | id)
+   Data: tofc_maint
+
+REML criterion at convergence: 30447.8
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.5437 -0.3855 -0.1359  0.1342  5.6875 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ id       (Intercept) 10.28    3.206   
+ Residual             11.74    3.426   
+Number of obs: 5616, groups:  id, 208
+
+Fixed effects:
+                  Estimate Std. Error t value
+(Intercept)       4.013960   0.389243  10.312
+period           -0.098054   0.009465 -10.360
+strangers        -1.071964   0.496189  -2.160
+period:strangers  0.012436   0.012065   1.031
+
+Correlation of Fixed Effects:
+            (Intr) period strngr
+period      -0.340              
+strangers   -0.784  0.267       
+prd:strngrs  0.267 -0.784 -0.340</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># c = number of tokens per round</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># strangers, 1 if reshuffled, 0 if fixed group</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># period = round number</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># period:strangers = interaction betwen both, does time trend differ for strangers?</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Random effects: (1 | id) = each participant has their own baseline withdrawal level.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Our interpretation… intercept (6.393), in round one, participants in fixed groups (partners) withdrew ~6.39 tokens on average. Period, on average, for the fixed groups, withdrawal increased very slightly at ~0.01 tokens per round. Strangers, in round 1, participants withdrew ~3.45 less tokens than the fixed group. Period:strangers, as the rounds went on, they decreased their withdrawal by ~0.096 tokens, a higher rate than the partners group.</p>
+<p>Randomness effect… id (intercept) our variance is 29.54 and our standard deviation is 5.435, showing us there is xubstantial variability in baseline withdrawal between participants. The residual variance is 12.78 and standard deviation is 3.575 meaning there is additional variability within participants across rounds. This means individuals differ quite a lot in their baseline withdrawal tendencies.</p>
+<p>To help understand this better we will create a visual of average withdrawals per round.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>tofc_maint <span class="sc">|&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(period, strangers) <span class="sc">|&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_withdrawal =</span> <span class="fu">mean</span>(c), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> period, <span class="at">y =</span> mean_withdrawal, <span class="at">color =</span> <span class="fu">factor</span>(strangers))) <span class="sc">+</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Withdrawal by Round and Group Type"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Round"</span>, <span class="at">y =</span> <span class="st">"Tokens Withdrawn"</span>, <span class="at">color =</span> <span class="st">"Strangers (1 = Yes)"</span>) <span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tofc_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This graph clearly shows us that participants in the strangers group (0), meaning that groups stay fixed for all 20 rounds started at a high baseline of token withdrawal and very slightly decreased per round until they got to the last few rounds they increased again. For stranger group (1), meaning participants were shuffled each round, they start at a much lower baseline for token withdrawal and they more rapidly decrease across rounds until they sort of plateau at round</p>
 </section>
 
 </main>
