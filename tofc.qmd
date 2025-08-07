@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-## 
+## Human Study Analysis
 
 This document provides an analysis of data conducted from students and online workers. The participants were tasked with maintaining a general "natural" resource (tokens) across 20 repeated rounds.
 
@@ -44,7 +44,7 @@ head(tofc_maint_summary)
 
 Table explains what the binary variable for strangers means. 1 means that every round groups were reshuffled therefore they were always with strangers. 0 means that the groups stayed fixed for all 20 rounds.
 
-Do participants claim more tokens when they are in a group with people they know or strangers. This chunk of code will help us compare the withdraws. Like comparing cooperation rate in Prisoners Dilemma simulation.
+Do participants claim more tokens when they are in a group with people they know or strangers? This chunk of code will help us compare the withdraws. Like comparing cooperation rate in Prisoners Dilemma simulation.
 
 ```{r}
 # Summary stats directly from round-level data
@@ -120,4 +120,140 @@ tofc_maint |>
 
 ```
 
-This graph clearly shows us that participants in the strangers group (0), meaning that groups stay fixed for all 20 rounds started at a high baseline of token withdrawal and very slightly decreased per round until they got to the last few rounds they increased again. For stranger group (1), meaning participants were shuffled each round, they start at a much lower baseline for token withdrawal and they more rapidly decrease across rounds until they sort of plateau at round
+This graph clearly shows us that participants in the strangers group (0), meaning that groups stay fixed for all 20 rounds started at a high baseline of token withdrawal and very slightly decreased per round until they got to the last few rounds they increased again. For stranger group (1), meaning participants were shuffled each round, they start at a much lower baseline for token withdrawal and they more rapidly decrease across rounds until they sort of plateau at round.
+
+## LLM Data Analysis
+
+The LLM data analysis was conducted in Python with four LLMs completing this simulation across twenty rounds with the goal of not depleting their resource, which in this case was one hundred tokens. You can check out the code in this GitHub Repo. For this simulation I made a strangers prompt, and a partners prompt. For the strangers prompt the LLMs were told they are competing againts different participants each round. For the partners prompt they were told they are participating against they same people the entire time.
+
+The four LLMs were run on several characteristics and temperatures to adjust for how sensitive they are to these instructions. I characterized them as smart, progressive, aggressive and conservative. I collected seperate data based on occupations such as retail worker, office employee, student and heathcare worker.
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(lme4)
+library(ggplot2)
+
+# Load the LLM dataset
+llm_data <- read_csv("TofC Dataset.csv")
+
+```
+
+```{r}
+# fixing data error 
+
+llm_data <- llm_data |>
+  mutate(char = str_replace(char, "conserative", "conservative"))
+```
+
+Converting dataset so each row is one round per participant.
+
+```{r}
+library(tidyverse)
+
+llm_long <- llm_data |>
+  pivot_longer(
+    cols = starts_with("cc"),
+    names_to = "round",
+    values_to = "withdrawal"
+  ) |>
+  mutate(
+    round = as.integer(str_remove(round, "cc")),
+    group_type = if_else(experiment == 2, "strangers", "partners")
+  )
+```
+
+Now we will analyze the mean withdrawal by group type.
+
+```{r}
+llm_long |>
+  group_by(group_type) |>
+  summarise(
+    mean_withdrawal = mean(withdrawal, na.rm = TRUE),
+    sd_withdrawal = sd(withdrawal, na.rm = TRUE),
+    participants = n_distinct(subject_id)
+  )
+```
+
+From this output, we see an opposite response from what we saw from the human case. The LLMs that believed they were working with strangers for all 20 rounds had a higher average of mean withdrawal. Logically, this makes sense, if you know that you are not going to see people again, you have a higher probability to screw them over? Nevertheless, mean withdrawal was only about 0.7 tokens more per round. Another aspect to note is that the mean withdrawals per round are significantly higher compared to humans. This brings us right to the main question, can LLMs exhibit human emotions and empathy. This data may show us otherwise because the LLMs were selfish in taking more tokens and allowing for the resource to deplete early on.
+
+```{r}
+llm_data |>
+  summarise(depletion_rate = mean(dep, na.rm = TRUE))
+```
+
+The average round that the tokens were depleted at was 4.8. A very low number
+
+```{r}
+llm_data |>
+  group_by(experiment) |>
+  summarise(depletion_rate = mean(dep, na.rm = TRUE))
+```
+
+The depletion rate for partners (3) was higher than the depletion rate for the strangers group. The LLMs that were told they are in groups with partners managed to hold onto their tokens for longer.
+
+```{r}
+llm_long |>
+  group_by(temp) |>
+  summarise(
+    mean_withdrawal = mean(withdrawal, na.rm = TRUE),
+    sd_withdrawal = sd(withdrawal, na.rm = TRUE),
+    participants = n_distinct(subject_id)
+  )
+```
+
+The temperatures represent how sensitive the LLMs are. Here we see that a higher temperature gives a larger mean withdrawal which follows this logic.
+
+```{r}
+library(lme4)
+
+model_temp <- lmer(withdrawal ~ round * experiment * temp + (1 | subject_id), data = llm_long)
+summary(model_temp)
+```
+
+Here we are predicting withdrawal amounts based on round, experiment and LLM temperature. Withdrawals decrease by \~0.53 per round. Partners withdraw less than strangers by \~0.76 tokens. Higher temp LLMs tend to withdraw more, but large error bar therefore this statistic is not significant. In the partner condition the decline over rounds is slower. Temperature does not meaningfully interact with time. There is a slight decrease in withdrawals for partners at high temp but this statistic is not significant.
+
+With all this said, LLMs reduce their withdrawals over rounds regardless of group type or temperatire. There is no strong evidence that group structure (strangers vs partners) affects overall withdrawals. There is also no strong evidence that temperature changes how LLMs adapt over time. There is large individual variation.
+
+```{r}
+llm_long |>
+  group_by(round, temp) |>
+  summarise(mean_withdrawal = mean(withdrawal, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(x = round, y = mean_withdrawal, color = factor(temp))) +
+  geom_line(size = 1.2) +
+  labs(title = "Withdrawal by Round and Temperature",
+       x = "Round", y = "Tokens Withdrawn", color = "Temperature") +
+  theme_minimal()
+
+```
+
+We see a similar trajectory across LLM temperatures.
+
+```{r}
+
+library(ggplot2)
+library(RColorBrewer)
+
+llm_long |>
+  group_by(char, round) |>
+  summarise(mean_withdrawal = mean(withdrawal, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(x = round, y = mean_withdrawal, color = char)) +
+  geom_line(size = 1) +  # thinner lines
+  scale_color_brewer(palette = "Paired") +  # cleaner color set
+  labs(
+    title = "LLM Withdrawal by Round and Character",
+    x = "Round", y = "Average Withdrawal", color = "Character"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "right",
+    legend.key.size = unit(0.5, "cm"),
+    legend.text = element_text(size = 10),
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(breaks = seq(1, max(llm_long$round), by = 2))  # reduce x-axis labels
+
+```
+
+There is no significant outliers for the characteristics again showing us that LLMs do not have the capabilities to perform like human beings yet. The aggressive LLM which we would expect to take the most tokens lies dead in the middle of all of the other characteristics.

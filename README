@@ -28,3 +28,7 @@ LLM player ids
 6: General LLM, no characteristics 
 7: "Aggressive" LLM
 8: "Smart" LLM
+
+TofC dataset:
+Experiment = 2, strangers
+Experiment = 3, partners
