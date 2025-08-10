@@ -134,6 +134,7 @@ vif(model2)
 | `iri_ec`  | 3.42 | Moderate correlation with others, but still acceptable.    |
 
 ## Alex Data
+
 The simulation we are using does not provide data for the partner "Alex". We have to write code to understand what to feed the LLM.
 
 ```{r}
@@ -148,7 +149,6 @@ alex_choices <- tibble(
 
 ```
 
-
 ## LLM Data Analysis
 
 ```{r}
@@ -159,6 +159,7 @@ llm_pd <- read_csv("SURP LLM Responses PD.csv") |>
   mutate(coop_rate = coop / 20)  # Make sure coop_rate is calculated if needed
 
 ```
+
 ```{r}
 # summarize cooperation by condition for LLM data
 llm_summary <- llm_pd |>
@@ -204,13 +205,14 @@ ggplot(comparison_summary, aes(x = con, y = mean_rate, fill = dataset)) +
 
 ```
 
-Here we compare our human data to our LLMs data. We can see here that for the LLMs that have a much lower average cooperation rate. With the mean rate for the image condition differing by ~.34 with a similar standard deviation. Additionally, we have a difference in the mean rate for the word condition differing by ~.23 and a much smaller standard deviation of ~.1 compared to .39. Are LLMs less likely to cooperate because they lack human empathy and emotions?
+Here we compare our human data to our LLMs data. We can see here that for the LLMs that have a much lower average cooperation rate. With the mean rate for the image condition differing by \~.34 with a similar standard deviation. Additionally, we have a difference in the mean rate for the word condition differing by \~.23 and a much smaller standard deviation of \~.1 compared to .39. Are LLMs less likely to cooperate because they lack human empathy and emotions?
 
 ```{r}
 t.test(coop_rate ~ con, data = pd)      # Original
 t.test(coop_rate ~ con, data = llm_pd)  # LLM
 ```
-Our t-test for the LLMs is large at 0.7 where our t statistic is low at ~0.39 showing us that this is not statistically significant. In this case there is no evidence for a difference in the image condition versus the word condition, further allowing us to understand that LLMs still lack the human emotion necessary to make human-based decisions. The difference in significance could also be due the much smaller sample size in the LLM responses (a data limitation). The VIF results show no problematic multicollinearity in your regression predictors, which means your regression results are stable.
+
+Our t-test for the LLMs is large at 0.7 where our t statistic is low at \~0.39 showing us that this is not statistically significant. In this case there is no evidence for a difference in the image condition versus the word condition, further allowing us to understand that LLMs still lack the human emotion necessary to make human-based decisions. The difference in significance could also be due the much smaller sample size in the LLM responses (a data limitation). The VIF results show no problematic multicollinearity in your regression predictors, which means your regression results are stable.
 
 ```{r}
 # Distribution comparison
@@ -220,9 +222,11 @@ ggplot() +
   labs(title = "Cooperation Rate Distributions", x = "Cooperation Rate", fill = "Dataset")
 
 ```
+
 Our human distribution (red) has a bimodal shape with two clear peaks, one peak close to 0 (very low cooperation rate) and another peak near 1 (very high cooperation rate).This suggests humans tend to cluster at extremes—either mostly cooperating or mostly defecting. LLM distribution (blue-green) shows a unimodal peak centered roughly around 0.25–0.35 cooperation rate. This indicates LLMs tend to have more moderate cooperation, generally cooperating less often and not clustering at the extremes. Can also mean they tend more to just go tit for tat.
 
 ## Personality Test Analysis
+
 ```{r}
 # summary statistics for each survey across human generated and LLM generated responses
 pd |>
@@ -255,9 +259,9 @@ llm_pd |>
 
 ```
 
-For humans, mean teq was ~43.6 with sd of ~9.78. Mean iri_pt was ~17.9 with sd of ~4.42. Mean iri_ec was 18.266 with sd of ~5.07. Mean for iri_fs is 17.425 with sd of 5.43. Mean iri_pd is 12 with sd of 4.31.
+For humans, mean teq was \~43.6 with sd of \~9.78. Mean iri_pt was \~17.9 with sd of \~4.42. Mean iri_ec was 18.266 with sd of \~5.07. Mean for iri_fs is 17.425 with sd of 5.43. Mean iri_pd is 12 with sd of 4.31.
 
-For LLMs mean teq is ~41.388 with sd of 11.03. Mean iri_pt is 20.11 and sd is 5.779. Mean iri_ec 21.5 with sd of 6.12. Mean iri_fs 18.388 with sd of 5.95. Mean iri_pd 14.19 with sd of 4.9.
+For LLMs mean teq is \~41.388 with sd of 11.03. Mean iri_pt is 20.11 and sd is 5.779. Mean iri_ec 21.5 with sd of 6.12. Mean iri_fs 18.388 with sd of 5.95. Mean iri_pd 14.19 with sd of 4.9.
 
 ```{r}
 
@@ -291,7 +295,8 @@ ggplot(empathy_summary, aes(x = measure, y = mean_score, fill = group)) +
   theme_minimal()
 
 ```
-This shows us that almost every value is larger for the LLMs except for in the teq survey. 
+
+This shows us that almost every value is larger for the LLMs except for in the teq survey.
 
 ```{r}
 library(psych)
@@ -305,7 +310,7 @@ print(result$p)    # p-values
 
 ```
 
-This shows us theer are no strong correlations between the personality tests and the cooperation rates for humans. 
+This shows us theer are no strong correlations between the personality tests and the cooperation rates for humans.
 
 ```{r}
 numeric_data <- llm_pd |> select(coop_rate, teq, iri_pt, iri_ec, iri_fs, iri_pd)
@@ -315,7 +320,8 @@ result <- corr.test(numeric_data)
 print(result$r)    # correlations
 print(result$p)    # p-values
 ```
-For the LLMs we have moderate to strong positive correlations for all personality surveys. 
+
+For the LLMs we have moderate to strong positive correlations for all personality surveys.
 
 ```{r}
 combined |>
@@ -326,4 +332,3 @@ combined |>
   labs(title = "Empathy Score Distributions by Group")
 
 ```
-
